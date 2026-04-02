@@ -1,0 +1,80 @@
+; 17. ALP to check if a given string is a palindrome
+.model small
+.data
+
+StrLen DB 05H
+STR    DB 'LEVEL$'
+REVSTR DB 06 DUP(?)
+
+MSG_EQ DB 0DH,0AH,'Palindrome$'
+MSG_NE DB 0DH,0AH,'Not Palindrome$'
+
+.code
+.startup
+
+; Build reversed string in REVSTR.
+CLD
+MOV AX, DS
+MOV ES, AX
+
+LEA SI, STR
+LEA DI, REVSTR
+MOV CL, StrLen
+MOV CH, 00H
+ADD SI, CX
+DEC SI
+
+STD
+
+REV_LOOP:
+    MOVSB
+    ADD DI, 2
+LOOP REV_LOOP
+
+CLD
+MOV BYTE PTR [DI], '$'
+
+; Compare STR and REVSTR for StrLen bytes.
+LEA SI, STR
+LEA DI, REVSTR
+MOV CL, StrLen
+MOV CH, 00H
+CLD
+REPE CMPSB
+JNE NOT_PAL
+
+LEA DX, MSG_EQ
+MOV AH, 09H
+INT 21H
+JMP SHOW_STRINGS
+
+NOT_PAL:
+LEA DX, MSG_NE
+MOV AH, 09H
+INT 21H
+
+SHOW_STRINGS:
+; Original string.
+MOV DL, 0DH
+MOV AH, 02H
+INT 21H
+MOV DL, 0AH
+INT 21H
+
+LEA DX, STR
+MOV AH, 09H
+INT 21H
+
+; Reversed string.
+MOV DL, 0DH
+MOV AH, 02H
+INT 21H
+MOV DL, 0AH
+INT 21H
+
+LEA DX, REVSTR
+MOV AH, 09H
+INT 21H
+
+.exit
+end
